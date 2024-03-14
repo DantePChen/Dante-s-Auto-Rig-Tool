@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import *
 import Rig_System_Function as RSF
 import Joint_Function as JF
+import Common_Functions as CF
 import maya.cmds as cmds
 import Assistant_Function as AssF
 
@@ -42,6 +43,7 @@ class CreateWindowTools(QDialog):
         q_add(self.layout(),
               q_button("Generate Blueprint Joints", self.GenerateBPJnts),
               q_button("Generate Bind Joints",self.GenerateBindJnts),
+              q_button("Align the finger",self.alignTheFinger),
               q_add(QHBoxLayout(),
                     q_add(QHBoxLayout(), QLabel(u"IK"), self.IKCheck),
                     q_add(QHBoxLayout(), QLabel(u"FK"), self.FKCheck),
@@ -67,18 +69,40 @@ class CreateWindowTools(QDialog):
             # first according to the bpjnts to copy a bind joints
             self.BindJnts = RSF.CreateJointChains(self.BPJnts[:-1],"Bind")
             # unparent finger joints for setting up the arm
-            fingerlist = [self.BindJnts[3],self.BindJnts[7],self.BindJnts[12],self.BindJnts[17],self.BindJnts[22]]
-            for joint in fingerlist:
+            fingerList = [self.BindJnts[3],self.BindJnts[7],self.BindJnts[11],self.BindJnts[15],self.BindJnts[19]]
+
+            for joint in fingerList:
                 cmds.parent(joint,world=True)
-                # align the finger separately
-                cmds.joint(joint, edit=True, orientJoint="xyz", secondaryAxisOrient="yup", children=True,
-                           zeroScaleOrient=True)
             # calculate the IK plane
-            JF.AlignToIKPlane(self.BindJnts[:3])
+            JF.alignToIKPlane(self.BindJnts[:3])
             # reconstruct the hierarchy
-            for joint in fingerlist:
+            for joint in fingerList:
                 cmds.parent(joint,self.BindJnts[2])
+
+            # calculate the plane of five fingers
+            for i in range(5):
+                JF.getIKPlaneVector(self.BindJnts[i*4+3:i*4+6],self.BindJnts[i*4+3])
+                CF.check_and_clear_jointOrient(self.BindJnts[i*4+6])
+
+            for joint in fingerList:
+                next_joint = cmds.listRelatives(joint,children = True)
+                cmds.parent(next_joint[0],world=True)
+
+            cmds.setAttr(self.BPJnts[0] + ".visibility",0)
+
             print("Bind joints generated")
+
+    def alignTheFinger(self):
+        fingerList = [self.BindJnts[3], self.BindJnts[7], self.BindJnts[11], self.BindJnts[15], self.BindJnts[19]]
+        nxtFingerList = [self.BindJnts[4], self.BindJnts[8], self.BindJnts[12], self.BindJnts[16], self.BindJnts[20]]
+        for jnt, nxtJnt in zip(fingerList, nxtFingerList):
+            cmds.parent(nxtJnt,jnt)
+        for joint in self.BindJnts[3:]:
+            CF.bake_Rotation(joint)
+        for i in range(5):
+            JF.alignTheFinger(self.BindJnts[4*i+3:4*i+7])
+        print("Aligned the fingers")
+
 
     def GenerateRigSystem(self):
         # only if switch is not selected, just create IK system
@@ -174,8 +198,6 @@ class CreateWindowTools(QDialog):
                 pass
     def Snap(self):
         AssF.snap_to_pivot()
-
-
 
 
 # Function to get the top-level application window

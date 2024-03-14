@@ -88,18 +88,18 @@ def CreateFkArm(blueprint_joints):
         CMF.connect_RotateAttr(ctrl, joint)
 
     # delete the tip ctrl
-    for ctrl in [circle_controllers[6],circle_controllers[11],circle_controllers[16],circle_controllers[21],circle_controllers[26]]:
+    for ctrl in [circle_controllers[6],circle_controllers[10],circle_controllers[14],circle_controllers[18],circle_controllers[22]]:
         parent = cmds.listRelatives(ctrl,parent=True)
         cmds.delete(parent)
 
     # set attributes
-    Three_Rotation_List = circle_controllers[3:5]+circle_controllers[7:9]+circle_controllers[12:14]+circle_controllers[17:19]+circle_controllers[22:24]
-    Three_Rotation_List.append(circle_controllers[0])
-    Three_Rotation_List.append(circle_controllers[2])
+    Three_Rotation_List = [circle_controllers[0],circle_controllers[2],circle_controllers[7],circle_controllers[11],circle_controllers[15],circle_controllers[19]]
+    Three_Rotation_List += circle_controllers[3:5]
     for ctrl in Three_Rotation_List:
         AF.hide_attributes(ctrl,"rotateX", "rotateY", "rotateZ")
-    AF.hide_attributes(circle_controllers[1],"rotateY")
-    RotationZ_List = circle_controllers[9:11]+circle_controllers[14:16]+circle_controllers[19:21]+circle_controllers[24:26]
+
+    RotationZ_List = circle_controllers[8:10]+circle_controllers[12:14]+circle_controllers[16:18]+circle_controllers[20:22]
+    RotationZ_List.append(circle_controllers[1])
     RotationZ_List.append(circle_controllers[5])
     for ctrl in RotationZ_List:
         AF.hide_attributes(ctrl,"rotateZ")
@@ -108,7 +108,7 @@ def CreateFkArm(blueprint_joints):
 
     FK_joints_list = FK_joints
     FK_ctrl_list = circle_controllers[:3]
-    fingerStart_List = [circle_controllers[3],circle_controllers[7],circle_controllers[12],circle_controllers[17],circle_controllers[22]]
+    fingerStart_List = [circle_controllers[3],circle_controllers[7],circle_controllers[11],circle_controllers[15],circle_controllers[19]]
     return_list=[FK_joints_list,FK_ctrl_list,fingerStart_List,FKJointGP]
 
     return return_list
@@ -152,7 +152,7 @@ def CreateIKArm(Bind_joints,blueprint_joints):
     distance = MF.distance(blueprint_joints[-1],Bind_joints[1])
     cmds.matchTransform(PV_Ctrl, Bind_joints[1], pos=True, rot=False, scl=True)
     cmds.parent(PV_Ctrl,Bind_joints[1])
-    AF.SetTransform(PV_Ctrl,Translation=[0,0,distance],Rotation=[0,0,0],Scale=[1,1,1])
+    cmds.setAttr(PV_Ctrl + ".translateY",distance)
     cmds.parent(PV_Ctrl,world=True)
     CMF.create_empty_group_and_match_transform(PV_Ctrl)
     cmds.poleVectorConstraint(PV_Ctrl,ArmIKHandle[0])

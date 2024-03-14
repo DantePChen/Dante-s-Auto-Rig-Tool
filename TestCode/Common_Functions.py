@@ -131,6 +131,13 @@ def connect_RotateAttr(ctrl, joint):
     cmds.connectAttr(ctrl + ".rotate.rotateZ", joint + ".rotate.rotateZ")
 
 def bake_Rotation(obj):
+
+    tempGrp = cmds.createNode('transform', name='tempGrp')
+    cmds.matchTransform(tempGrp,obj,position = False, rotation=True, scale=False)
+    check_and_clear_jointOrient(obj)
+    cmds.matchTransform(obj,tempGrp,position = False, rotation=True, scale=False)
+    cmds.delete(tempGrp)
+
     tempRX = cmds.getAttr(obj + ".rotate.rotateX") + cmds.getAttr(obj + ".jointOrientX")
     tempRY = cmds.getAttr(obj + ".rotate.rotateY") + cmds.getAttr(obj + ".jointOrientY")
     tempRZ = cmds.getAttr(obj + ".rotate.rotateZ") + cmds.getAttr(obj + ".jointOrientZ")

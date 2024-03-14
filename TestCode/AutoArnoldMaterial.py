@@ -15,7 +15,7 @@ def create_arnold_material(material,texture_node):
     keyword = "Roughness"
     if keyword.lower() in texture_node.lower():
         cmds.setAttr(texture_node + '.colorSpace', "Raw", type='string')
-        cmds.connectAttr(texture_node + ".outAlpha", material + ".diffuseRoughness")
+        cmds.connectAttr(texture_node + ".outAlpha", material + ".specularRoughness")
 
     keyword = "Normal"
     if keyword.lower() in texture_node.lower():

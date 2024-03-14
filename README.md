@@ -4,3 +4,8 @@ The tool is wrote in seperate module, so it just take time to expand to the full
 features for now:
 1. IK_FK seamless switch without any plugins needed, all you just need to do is open it and use it.
 2. Using matrix to replace all the constrain nodes, so it should have sightly performance improvement.
+
+
+Update 0314
+New Feature：
+1. it has the function of align the axis of joint for IK and finger joints.
